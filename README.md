@@ -1,158 +1,116 @@
-# Itzfizz Scroll-Driven Hero Experience
+# Itzfizz Scroll-Driven Hero
 
-> **Frontend Engineering Assignment / Interactive Demo**  
-> An interactive, high-performance scroll-driven hero experience built with React, Vite, Tailwind CSS, GSAP, and ScrollTrigger.
+A scroll-driven hero section built with React, Tailwind CSS and GSAP ScrollTrigger. The page opens with a staggered entrance animation, then pins the hero while scroll progress drives the vehicle's movement, scale, rotation, text shift and background parallax.
 
----
+**Live demo:** https://itzfizz-project-opal.vercel.app
+**Repository:** https://github.com/Mihir4510/itzfizz_project
 
-## 🌟 Overview
-
-The **Itzfizz Scroll-Driven Hero Experience** demonstrates a modern digital agency hero section with multi-phase animations. The project seamlessly combines an initial page-load entrance sequence with a pinned, scroll-driven interactive timeline where user scroll progress controls vehicle rotation, horizontal translation, scaling, text shifting, and background parallax depth.
+> Frontend engineering assignment: recreation of the reference hero animation at [paraschaturvedi.github.io/car-scroll-animation](https://paraschaturvedi.github.io/car-scroll-animation).
 
 ---
 
-## ✨ Features
+## Highlights
 
-- **Initial Load Entrance Sequence**: Staggered reveal for hero heading, visual elements, statistics cards, and scroll indicator.
-- **Scroll-Driven Hero Pinning**: The hero section pins smoothly during scrolling over a controlled scroll distance (`+=1400`).
-- **GPU-Accelerated Motion**: All scroll animations exclusively manipulate `transform` (`xPercent`, `yPercent`, `scale`, `rotation`) and `opacity` properties.
-- **Scrubbed Progress**: Animation timeline advances on scroll down and smoothly reverses on scroll up (`scrub: 1`).
-- **Multi-Layer Background Parallax**: Layered background glow and depth layers move at different rates to create visual immersion.
-- **Responsive Architecture**: Built using `gsap.matchMedia()` to adjust transforms for desktop, tablet, and mobile viewports.
-- **Reduced Motion Support**: Automatically respects `prefers-reduced-motion: reduce` user settings by disabling pinning and horizontal drift.
-- **Layout Shift Prevention**: Hardened aspect ratio containers (`aspect-[21/9] sm:aspect-[16/7]`) ensure zero Cumulative Layout Shift (CLS).
+- **Entrance sequence:** headline, visual, statistic cards and scroll indicator reveal in a staggered timeline on load.
+- **Scroll-linked motion:** the hero pins for a fixed scroll distance (`+=1400`) and the timeline is scrubbed (`scrub: 1`), so motion follows scroll position and reverses smoothly when scrolling up.
+- **Compositor-friendly animation:** only `transform` (`xPercent`, `yPercent`, `scale`, `rotation`) and `opacity` are animated. No layout properties change during scroll.
+- **Layered parallax:** background glow and depth layers move at different rates.
+- **Responsive:** `gsap.matchMedia()` provides separate desktop, tablet and mobile configurations.
+- **Accessible:** respects `prefers-reduced-motion`, uses semantic HTML, visible focus states and `aria-hidden` on decorative graphics.
+- **No layout shift:** the visual sits in a fixed aspect-ratio container (`aspect-[21/9] sm:aspect-[16/7]`).
 
----
+## Tech Stack
 
-## 🛠️ Tech Stack
+| Area | Technology |
+| --- | --- |
+| UI | React 19 |
+| Build tool | Vite 8 |
+| Styling | Tailwind CSS v4 |
+| Animation | GSAP 3 + ScrollTrigger |
+| React integration | `@gsap/react` (`useGSAP`) |
+| Language | JavaScript (ES modules) |
+| Hosting | Vercel |
 
-- **Framework**: [React 19](https://react.dev/)
-- **Build Tool**: [Vite 8](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Animation Engine**: [GSAP 3](https://greensock.com/gsap/)
-- **Scroll Plugin**: [ScrollTrigger](https://greensock.com/scrolltrigger/)
-- **React GSAP Hook**: [`@gsap/react`](https://greensock.com/react/)
-- **Language**: JavaScript (ES Next)
+## How the Animation Works
 
----
+```text
+React render + refs
+  -> Hero component passes refs to useHeroAnimation
+  -> useGSAP creates a scoped GSAP context
+  -> Intro timeline (on load) + scroll timeline (ScrollTrigger, pinned, scrubbed)
+  -> Scroll position drives timeline progress
+  -> Transform/opacity updates on the DOM
+```
 
-## 📁 Project Architecture
+**Phase 1: Intro (time-based).** A one-off timeline staggers the heading, visual, stat cards and scroll indicator into view.
+
+**Phase 2: Scroll (progress-based).** ScrollTrigger pins the hero and links timeline progress to scroll position. Tunable values live in `heroAnimationConfig.js` for desktop, mobile and reduced-motion modes.
+
+## Performance
+
+- Animations use composited properties only, avoiding layout and paint work on every frame.
+- ScrollTrigger batches updates on GSAP's `requestAnimationFrame` ticker instead of custom scroll listeners.
+- `useGSAP` reverts timelines, triggers and pin spacers on unmount, so there are no leaks under React Strict Mode.
+- A fixed aspect-ratio container prevents cumulative layout shift.
+
+## Accessibility
+
+- `prefers-reduced-motion: reduce` disables pinning and horizontal drift.
+- Semantic landmarks (`header`, `nav`, `main`, `section`, `footer`) and a logical heading hierarchy.
+- Keyboard focus rings on interactive elements (`focus-visible`).
+- Decorative SVGs are hidden from assistive technology; interactive indicators have descriptive labels.
+
+## Project Structure
 
 ```text
 src/
-├── app/
-│   ├── App.jsx              # Main application shell
-│   └── app.css              # Custom utilities, glassmorphism, & glow effects
+├── app/                     # App shell and global styles (glass and glow utilities)
 ├── components/
-│   ├── layout/              # Fixed Navbar & Footer components
-│   └── ui/                  # Reusable UI primitives (Button, SectionLabel, ScrollIndicator)
-├── constants/
-│   └── siteConfig.json      # Site metadata & navigation links
-├── features/
-│   └── hero/
-│       ├── animations/
-│       │   ├── heroAnimationConfig.js  # Tunable animation constants (desktop/mobile/reducedMotion)
-│       │   ├── heroIntro.js            # Initial page-load entry timeline
-│       │   └── heroScroll.js           # ScrollTrigger pinning & parallax matchMedia
-│       ├── components/
-│       │   ├── Hero.jsx                # Main hero container component
-│       │   ├── HeroBackground.jsx      # Parallax background layer
-│       │   ├── HeroHeading.jsx         # Hero title, badge & subheading
-│       │   ├── HeroStats.jsx           # Grid of key performance statistics
-│       │   └── HeroVisual.jsx          # Futuristic vector visual asset container
-│       ├── data/
-│       │   └── heroData.js             # Hero content & statistics data
-│       └── hooks/
-│           ├── useHeroAnimation.js     # Master hook connecting React refs to GSAP
-│           └── useReducedMotion.js     # Accessibility media query hook
-├── lib/
-│   └── gsap.js              # Centralized GSAP plugin registration
-├── sections/                # Supporting page sections (Services, StatsSection, CTASection)
-└── utils/                   # Animation helpers & utility functions
+│   ├── layout/              # Navbar, Footer
+│   └── ui/                  # Button, SectionLabel, ScrollIndicator
+├── constants/               # Site metadata and navigation (siteConfig.json)
+├── features/hero/
+│   ├── animations/          # heroAnimationConfig, heroIntro, heroScroll
+│   ├── components/          # Hero, HeroBackground, HeroHeading, HeroStats, HeroVisual
+│   ├── data/                # Hero copy and statistics (heroData.js)
+│   └── hooks/               # useHeroAnimation, useReducedMotion
+├── lib/                     # GSAP plugin registration
+├── sections/                # Services, StatsSection, CTASection
+└── utils/                   # Animation helpers
 ```
 
----
+## Getting Started
 
-## 🔄 Animation Architecture
-
-```text
-React (DOM Render & Refs)
-  ↓
-Hero Component (Passes refs to custom hook)
-  ↓
-useHeroAnimation (Manages GSAP Context & lifecycle cleanup)
-  ↓
-GSAP (Creates initial intro timeline & scroll timeline)
-  ↓
-ScrollTrigger (Connects window scroll offset to scrubbed progress)
-  ↓
-User Scroll (Scroll down advances progress / scroll up reverses progress)
-  ↓
-DOM Transforms (GPU-accelerated inline transform style updates)
-```
-
----
-
-## ⚡ Performance Optimization
-
-- **Composite Layer Animations**: Motion is strictly restricted to GPU-composited properties (`xPercent`, `yPercent`, `scale`, `rotation`, `opacity`). Layout-changing properties like `width`, `height`, `top`, `left`, `margin`, or `padding` are completely avoided during animation.
-- **Debounced / Off-Thread Scroll Processing**: GSAP ScrollTrigger uses efficient `requestAnimationFrame` ticking rather than raw `window.addEventListener('scroll')` handlers.
-- **Context Teardown**: `useGSAP` automatically cleans up GSAP instances, timelines, and ScrollTrigger pin spacers when components unmount.
-
----
-
-## ♿ Accessibility & Standards
-
-- **Reduced Motion Preference**: Detects `(prefers-reduced-motion: reduce)` via media queries and disables scroll pinning and heavy visual drift.
-- **Semantic HTML**: Built using `<header>`, `<main>`, `<section>`, `<nav>`, `<footer>`, and proper `<h1>` → `<h3>` heading hierarchies.
-- **Keyboard Navigation**: Interactive elements feature visible focus rings (`focus-visible:ring-cyan-400`).
-- **Screen Reader Support**: Decorative visual SVGs are marked with `aria-hidden="true"`, while interactive indicators feature descriptive `aria-label` attributes.
-
----
-
-## 💻 Local Development
-
-Follow these steps to run the project locally:
+**Prerequisites:** Node.js 18+ and npm.
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/itzfizz/itzfizz-scroll-driven-hero.git
-
-# 2. Navigate to project directory
-cd itzfizz-scroll-driven-hero
-
-# 3. Install dependencies
+git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
+cd YOUR-REPO
 npm install
-
-# 4. Start local development server
-npm run dev
+npm run dev        # http://localhost:5173
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm run preview` | Preview the production build locally |
 
----
+## Deployment
 
-## 🚀 Production Build & Preview
+The project is deployed on Vercel with the default Vite settings:
 
-To build and preview the production bundle:
+- **Build command:** `npm run build`
+- **Output directory:** `dist`
 
-```bash
-# Generate optimized production build
-npm run build
+Pushing to `main` triggers a new production deployment.
 
-# Preview production build locally
-npm run preview
-```
+## Possible Improvements
 
----
+- Add a Lighthouse report and a short screen recording of the scroll sequence.
+- Introduce Lenis for inertial smooth scrolling.
+- Add visual regression tests for the pinned hero at key breakpoints.
 
-## 🌐 Live Demo & Repository Links
+## License
 
-- **Live Demo URL**: [https://itzfizz-scroll-driven-hero.vercel.app](https://itzfizz-scroll-driven-hero.vercel.app) *(Replace with actual deployed URL)*
-- **GitHub Repository**: [https://github.com/itzfizz/itzfizz-scroll-driven-hero](https://github.com/itzfizz/itzfizz-scroll-driven-hero) *(Replace with actual repository URL)*
-
----
-
-## 📄 License
-
-This project is created as a frontend engineering assignment for Itzfizz Digital.
+Created as a frontend engineering assignment. Reference concept credit: [Paras Chaturvedi](https://paraschaturvedi.github.io/car-scroll-animation).
