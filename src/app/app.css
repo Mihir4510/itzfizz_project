@@ -1,4 +1,6 @@
-/* Glassmorphism & custom glowing utilities */
+/* ===== Glassmorphism Panels ===== */
+
+/* Original glass-panel (kept for backwards-compat with follow-up sections) */
 .glass-panel {
   background: rgba(13, 17, 26, 0.65);
   backdrop-filter: blur(16px);
@@ -13,11 +15,12 @@
 
 .glass-panel-hover:hover {
   background: rgba(20, 27, 41, 0.75);
-  border-color: rgba(6, 182, 212, 0.3);
-  box-shadow: 0 12px 40px 0 rgba(6, 182, 212, 0.15);
+  border-color: rgba(198, 255, 61, 0.3);
+  box-shadow: 0 12px 40px 0 rgba(198, 255, 61, 0.12);
   transform: translateY(-2px);
 }
 
+/* ===== Text gradient utilities ===== */
 .text-gradient {
   background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
   -webkit-background-clip: text;
@@ -25,22 +28,7 @@
 }
 
 .text-gradient-accent {
-  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+  background: linear-gradient(135deg, #C6FF3D 0%, #22D3EE 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-}
-
-.hero-glow-cyan {
-  background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, rgba(0, 0, 0, 0) 70%);
-}
-
-.hero-glow-purple {
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-}
-
-.bg-grid-pattern {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
